@@ -331,6 +331,11 @@ Please follow the response format from your system prompt. Include activation lo
                 body = this._generateGeneralResponse(input, activated);
         }
 
+        // Wrap technical agent dialogues so they can be hidden in simple Dialogue view
+        body = body.replace(/<p>\s*<strong>\[[\s\S]*?<\/p>/g, match => {
+            return match.replace('<p>', '<p class="sim-agent-log">');
+        });
+
         return { title, body, confidence, taskType, agentCount: activated.length, live: false };
     }
 
@@ -353,18 +358,18 @@ Please follow the response format from your system prompt. Include activation lo
 <p style="color:var(--warning); font-size:11px; margin-top:12px">[Simulation Mode · Set ANTHROPIC_API_KEY for live ${this.getModelLabel()} intelligence]</p>`,
 
             'default': `<h3>Processing Complete</h3>
-<p>Your request "<em>${this._escapeHtml(input)}</em>" has been processed through the neural network pipeline.</p>
+<p>Your request "<em>${this._escapeHtml(input)}</em>" has been safely processed by the neural network.</p>
 <p><strong>[Reasoner — ${reasoner ? reasoner.moodData.emoji + ' ' + reasoner.mood : '🤔 curious'}]:</strong> I've analyzed your input and identified it as a general knowledge request. The full pipeline was engaged to ensure comprehensive coverage.</p>
 <p><strong>[Critic — ${critic ? critic.moodData.emoji + ' ' + critic.mood : '✅ happy'}]:</strong> Output reviewed. The response draws from multiple knowledge domains and has been validated for coherence.</p>
-<h3>Key Insights</h3>
-<ul>
-<li>Task complexity: <strong>Medium</strong> — full pipeline required (no wormhole shortcut)</li>
+<h3 class="sim-agent-log">Key Insights</h3>
+<ul class="sim-agent-log">
+<li>Task complexity: <strong>Medium</strong> — full pipeline required</li>
 <li>Primary reasoning agent: <strong>Reasoner</strong> with support from <strong>Summarizer</strong></li>
 <li>${activated.length} agents collaborated to generate this response</li>
 <li>Network confidence in this output: <strong>${this.network.getConfidence()}%</strong></li>
 </ul>
 <p>The response has been stored in Memory for future context. Ask follow-up questions for deeper analysis.</p>
-<p style="color:var(--warning); font-size:11px; margin-top:12px">[Simulation Mode · Set ANTHROPIC_API_KEY for live intelligence]</p>`
+<p class="sim-agent-log" style="color:var(--warning); font-size:11px; margin-top:12px">[Simulation Mode · Set API KEY for live intelligence]</p>`
         };
 
         if (/hello|hi|hey|greet/i.test(input)) return responses.hello;

@@ -377,10 +377,16 @@ class App {
         document.getElementById('tab-pipeline').addEventListener('click', () => {
             document.getElementById('tab-pipeline').classList.add('active');
             document.getElementById('tab-dialogue').classList.remove('active');
+            this.dom.chatMessages.classList.remove('view-dialogue');
+            this.dom.chatMessages.classList.add('view-pipeline');
+            this._scrollChat();
         });
         document.getElementById('tab-dialogue').addEventListener('click', () => {
             document.getElementById('tab-dialogue').classList.add('active');
             document.getElementById('tab-pipeline').classList.remove('active');
+            this.dom.chatMessages.classList.remove('view-pipeline');
+            this.dom.chatMessages.classList.add('view-dialogue');
+            this._scrollChat();
         });
     }
 

@@ -1278,6 +1278,60 @@ html, body {
 
 .dominant-mood { color: var(--text-secondary); }
 
+.network-status-message .ns-value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* ============================================================
+   VIEW MODES (Pipeline vs Dialogue)
+   ============================================================ */
+.chat-messages.view-dialogue .activation-message,
+.chat-messages.view-dialogue .dialogue-message,
+.chat-messages.view-dialogue .network-status-message,
+.chat-messages.view-dialogue .mode-banner {
+    display: none !important;
+}
+
+/* Make response bubbles look more like WhatsApp/iMessage in Dialogue view */
+.chat-messages.view-dialogue .response-message {
+    background: var(--bg-secondary);
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    margin-bottom: 24px;
+    padding: 20px;
+    border-radius: 0 12px 12px 12px;
+}
+.chat-messages.view-dialogue .response-badges,
+.chat-messages.view-dialogue .response-message > div[style*="font-family"],
+.chat-messages.view-dialogue .sim-agent-log,
+.chat-messages.view-dialogue h3 {
+    display: none !important; /* hide avatar/voice/usage metadata lines and technical logs */
+}
+.chat-messages.view-dialogue .response-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    opacity: 0.8;
+}
+.chat-messages.view-dialogue .response-body {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+.chat-messages.view-dialogue .user-message {
+    background: rgba(167, 139, 250, 0.1);
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    align-self: flex-end;
+    margin-left: max(20%, 40px);
+    border-radius: 12px 12px 0 12px;
+}
+
+/* ============================================================
+   BOTTOM NAVIGATION (Mobile)
+   ============================================================ */
+
 .status-model {
     color: var(--color-reason);
     font-size: 9px;
