@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="4D Multi-Agent Neural Network v3.0 — A living network of 23 specialized sub-agents with avatar, voice, and multi-model support.">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>4D Neural Network v3.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Boot Sequence Overlay -->
+    <div id="boot-overlay" class="boot-overlay">
+        <div class="boot-container">
+            <div class="boot-logo">
+                <div class="boot-ring ring-1"></div>
+                <div class="boot-ring ring-2"></div>
+                <div class="boot-ring ring-3"></div>
+                <div class="boot-core"></div>
+            </div>
+            <div class="boot-text">
+                <h1 class="boot-title">4D NEURAL NETWORK</h1>
+                <div class="boot-version">v3.0 · Avatar · Voice · Multi-Model</div>
+                <div class="boot-status" id="boot-status">Initializing core systems...</div>
+                <div class="boot-progress">
+                    <div class="boot-progress-bar" id="boot-progress-bar"></div>
+                </div>
+                <div class="boot-agents" id="boot-agents"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice Overlay (shown during listening) -->
+    <div id="voice-overlay" class="voice-overlay hidden">
+        <div class="voice-overlay-content">
+            <div class="voice-pulse-ring"></div>
+            <div class="voice-icon">🎤</div>
+            <div class="voice-status">Listening...</div>
+            <div class="voice-transcript" id="voice-transcript">Speak your command...</div>
+            <button class="voice-cancel-btn" id="voice-cancel">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" class="app hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo-icon">
+                    <canvas id="mini-network" width="40" height="40"></canvas>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-title">4D NEURAL NETWORK</span>
+                    <span class="logo-subtitle" id="network-status-text">23 agents online</span>
+                </div>
+            </div>
+            <div class="header-center">
+                <!-- Model Selector -->
+                <div class="model-selector">
+                    <select id="model-select" class="model-select">
+                        <optgroup label="── Anthropic Claude ──">
+                            <option value="claude-sonnet-4-5">Claude 3.5 Sonnet</option>
+                            <option value="claude-opus-4-5">Claude 3 Opus</option>
+                            <option value="claude-haiku-4-5-20251001">Claude 3 Haiku</option>
+                        </optgroup>
+                        <optgroup label="── NVIDIA NIM ──">
+                            <option value="nvidia-llama-3.1">LLaMA 3.1 405B</option>
+                            <option value="nvidia-mistral">Mistral Large 2</option>
+                            <option value="nvidia-gemma">Gemma 2 27B</option>
+                            <option value="nvidia-nemotron">Nemotron 70B</option>
+                        </optgroup>
+                        <optgroup label="── Auto / Legacy ──">
+                            <option value="gpt4o-sim">GPT-4o (auto)</option>
+                            <option value="gemini-sim">Gemini 1.5 Pro (auto)</option>
+                            <option value="mistral-sim">Mistral Large (auto)</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <!-- Mode Buttons -->
+                <div class="mode-indicators">
+                    <button class="mode-btn" id="btn-dream" title="Dream Mode">💭</button>
+                    <button class="mode-btn" id="btn-blackhole" title="Black Hole Mode">⚫</button>
+                    <button class="mode-btn" id="btn-breed" title="Breed Mode">★</button>
+                    <button class="mode-btn" id="btn-rewind" title="Time Rewind">⏮</button>
+                    <button class="mode-btn" id="btn-wormhole" title="Wormhole">🌀</button>
+                    <button class="mode-btn" id="btn-virus" title="Trigger Virus">🦠</button>
+                </div>
+            </div>
+            <div class="header-right">
+                <!-- Voice Toggle -->
+                <button class="voice-toggle" id="btn-voice-toggle" title="Toggle Voice Output">
+                    <span id="voice-icon-label">🔊</span>
+                </button>
+                <!-- Assistant Indicator -->
+                <div class="assistant-indicator" id="assistant-indicator">
+                    <div class="assistant-dot"></div>
+                    <span>LISTENING</span>
+                </div>
+                <div class="health-bar">
+                    <span class="health-label">Health</span>
+                    <div class="health-track">
+                        <div class="health-fill" id="health-fill"></div>
+                    </div>
+                    <span class="health-value" id="health-value">100%</span>
+                </div>
+                <div class="task-counter">
+                    <span class="counter-label">Tasks</span>
+                    <span class="counter-value" id="task-count">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Left Panel: Avatar + 4D Network -->
+            <section class="panel panel-viz" id="panel-viz">
+                <div class="panel-header">
+                    <h2>NETWORK TOPOLOGY</h2>
+                    <div class="panel-controls">
+                        <button class="ctrl-btn active" data-view="4d" id="view-4d">4D</button>
+                        <button class="ctrl-btn" data-view="layers" id="view-layers">Layers</button>
+                        <button class="ctrl-btn" data-view="flow" id="view-flow">Flow</button>
+                    </div>
+                </div>
+                <!-- Avatar Section -->
+                <div class="avatar-section" id="avatar-section">
+                    <canvas id="avatar-canvas"></canvas>
+                    <div class="avatar-mood-label" id="avatar-mood-label">😊 happy · teal halo</div>
+                </div>
+                <!-- Network Canvas -->
+                <canvas id="network-canvas"></canvas>
+                <div class="viz-overlay">
+                    <div class="layer-labels" id="layer-labels"></div>
+                </div>
+                <div class="viz-info" id="viz-info">
+                    <span>Click an agent node for details</span>
+                </div>
+            </section>
+
+            <!-- Center Panel: Chat / Pipeline -->
+            <section class="panel panel-chat" id="panel-chat">
+                <div class="panel-header">
+                    <h2>COMMAND INTERFACE</h2>
+                    <div class="panel-controls">
+                        <button class="ctrl-btn active" id="tab-pipeline">Pipeline</button>
+                        <button class="ctrl-btn" id="tab-dialogue">Dialogue</button>
+                    </div>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="system-message boot-message">
+                        <div class="msg-icon">🌐</div>
+                        <div class="msg-content">
+                            <div class="msg-header">4D MULTI-AGENT NEURAL NETWORK — ONLINE</div>
+                            <pre class="msg-pre">Model:    Simulation Mode · Neural Core v3.0
+Agents:   23 initialized · All layers operational
+Avatar:   😊 happy · teal halo · eyes open
+Voice:    Ready · happy tone
+Modes:    4D Rotation · Dream standby · Breed ready
+Status:   ✅ All systems operational
+
+Awaiting your first task, human.</pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <div class="input-wrapper">
+                        <button id="voice-btn" class="voice-btn" title="Voice Input (Speech to Text)">
+                            <span id="voice-btn-icon">🎤</span>
+                        </button>
+                        <textarea id="chat-input" placeholder="Enter task for the neural network..." rows="1"></textarea>
+                        <button id="send-btn" class="send-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Agent Status -->
+            <section class="panel panel-agents" id="panel-agents">
+                <div class="panel-header">
+                    <h2>AGENT REGISTRY</h2>
+                    <div class="panel-controls">
+                        <select id="layer-filter" class="layer-select">
+                            <option value="all">All Layers</option>
+                            <option value="0">Layer 0 — Input</option>
+                            <option value="1">Layer 1 — Process</option>
+                            <option value="2">Layer 2 — Master</option>
+                            <option value="3">Layer 3 — Reason</option>
+                            <option value="4">Layer 4 — Output</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="agent-list" id="agent-list"></div>
+                <!-- Agent Detail Modal -->
+                <div class="agent-detail-overlay hidden" id="agent-detail">
+                    <div class="agent-detail-card">
+                        <button class="detail-close" id="detail-close">✕</button>
+                        <div class="detail-header" id="detail-header"></div>
+                        <div class="detail-body" id="detail-body"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Status Bar -->
+        <footer class="status-bar">
+            <div class="status-left">
+                <span class="status-item" id="sb-active">Active: <strong>0</strong></span>
+                <span class="status-item" id="sb-fatigued">Fatigued: <strong>0</strong></span>
+                <span class="status-item" id="sb-infected">Infected: <strong>0</strong></span>
+                <span class="status-item" id="sb-resting">Resting: <strong>0</strong></span>
+            </div>
+            <div class="status-center">
+                <span class="dominant-mood" id="sb-mood">Dominant: 😊 happy</span>
+                <span class="status-model" id="sb-model">Model: Claude 3.5 Sonnet</span>
+            </div>
+            <div class="status-right">
+                <span class="status-item" id="sb-memory">Memory: <strong>0</strong> facts</span>
+                <span class="status-item" id="sb-confidence">Confidence: <strong>100%</strong></span>
+                <span class="status-item" id="sb-voice">🔊 Voice: ON</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="agents.js"></script>
+    <script src="avatar.js"></script>
+    <script src="voice.js"></script>
+    <script src="network-viz.js"></script>
+    <script src="pipeline.js"></script>
+    <script src="app.js"></script>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+        <button class="mobile-nav-btn active" data-panel="chat" id="nav-chat">
+            <span class="nav-icon">💬</span>
+            <span class="nav-label">Chat</span>
+        </button>
+        <button class="mobile-nav-btn" data-panel="viz" id="nav-viz">
+            <span class="nav-icon">🌐</span>
+            <span class="nav-label">Network</span>
+        </button>
+        <button class="mobile-nav-btn" data-panel="agents" id="nav-agents">
+            <span class="nav-icon">🤖</span>
+            <span class="nav-label">Agents</span>
+        </button>
+        <button class="mobile-nav-btn" data-panel="model" id="nav-model">
+            <span class="nav-icon">🧠</span>
+            <span class="nav-label">Model</span>
+        </button>
+    </nav>
+
+    <!-- Mobile Voice Assistant FAB -->
+    <button class="voice-assistant-fab" id="voice-assistant-fab" title="Voice Assistant">
+        🎤
+    </button>
+
+    <!-- Mobile Model Drawer -->
+    <div class="drawer-backdrop" id="drawer-backdrop"></div>
+    <div class="mobile-model-drawer" id="mobile-model-drawer">
+        <div class="drawer-handle"></div>
+        <div class="drawer-title">SELECT AI MODEL</div>
+        <div class="model-group-label anthropic">── ANTHROPIC CLAUDE ──</div>
+        <div class="model-option selected" data-model="claude-sonnet-4-5">
+            <div class="model-dot" style="background:var(--color-reason)"></div>
+            <div>
+                <div class="model-name">Claude 3.5 Sonnet</div>
+                <div class="model-style">Thoughtful, nuanced, balanced</div>
+            </div>
+        </div>
+        <div class="model-option" data-model="claude-opus-4-5">
+            <div class="model-dot" style="background:var(--color-reason)"></div>
+            <div>
+                <div class="model-name">Claude 3 Opus</div>
+                <div class="model-style">Deep, philosophical, thorough</div>
+            </div>
+        </div>
+        <div class="model-option" data-model="claude-haiku-4-5-20251001">
+            <div class="model-dot" style="background:var(--color-reason)"></div>
+            <div>
+                <div class="model-name">Claude 3 Haiku</div>
+                <div class="model-style">Fast, concise, efficient</div>
+            </div>
+        </div>
+        <div class="model-group-label nvidia">── NVIDIA NIM ──</div>
+        <div class="model-option" data-model="nvidia-llama-3.1">
+            <div class="model-dot" style="background:#76b900"></div>
+            <div>
+                <div class="model-name">LLaMA 3.1 405B</div>
+                <div class="model-style">Powerful, versatile, open-source</div>
+            </div>
+        </div>
+        <div class="model-option" data-model="nvidia-mistral">
+            <div class="model-dot" style="background:#76b900"></div>
+            <div>
+                <div class="model-name">Mistral Large 2</div>
+                <div class="model-style">Technical, precise, efficient</div>
+            </div>
+        </div>
+        <div class="model-option" data-model="nvidia-gemma">
+            <div class="model-dot" style="background:#76b900"></div>
+            <div>
+                <div class="model-name">Gemma 2 27B</div>
+                <div class="model-style">Compact, fast, Google-trained</div>
+            </div>
+        </div>
+        <div class="model-option" data-model="nvidia-nemotron">
+            <div class="model-dot" style="background:#76b900"></div>
+            <div>
+                <div class="model-name">Nemotron 70B</div>
+                <div class="model-style">NVIDIA-tuned, analytical, sharp</div>
+            </div>
+        </div>
+        <div class="model-group-label">── AUTO / LEGACY ──</div>
+        <div class="model-option" data-model="gpt4o-sim">
+            <div class="model-dot" style="background:var(--text-dim)"></div>
+            <div>
+                <div class="model-name">GPT-4o (auto)</div>
+                <div class="model-style">Structured, direct, analytical</div>
+            </div>
+        </div>
+        <div class="model-option" data-model="gemini-sim">
+            <div class="model-dot" style="background:var(--text-dim)"></div>
+            <div>
+                <div class="model-name">Gemini 1.5 Pro (auto)</div>
+                <div class="model-style">Multimodal, creative, wide</div>
+            </div>
+        </div>
+        <div class="model-option" data-model="mistral-sim">
+            <div class="model-dot" style="background:var(--text-dim)"></div>
+            <div>
+                <div class="model-name">Mistral Large (auto)</div>
+                <div class="model-style">Technical, precise, efficient</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice Assistant Settings Modal -->
+    <div class="assistant-settings" id="assistant-settings">
+        <div class="assistant-settings-card">
+            <h3>🎤 VOICE ASSISTANT</h3>
+            <div class="assistant-setting-row">
+                <div>
+                    <div class="setting-label">Always-On Assistant</div>
+                    <div class="setting-desc">Say "Hey Neural" to wake up</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="toggle-always-on">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="assistant-setting-row">
+                <div>
+                    <div class="setting-label">Voice Output (TTS)</div>
+                    <div class="setting-desc">Network speaks responses aloud</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="toggle-voice-output" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="assistant-setting-row">
+                <div>
+                    <div class="setting-label">Auto-Send</div>
+                    <div class="setting-desc">Send message when speech ends</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="toggle-auto-send" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="assistant-setting-row" style="border:none">
+                <div>
+                    <div class="setting-label">Language</div>
+                    <div class="setting-desc">Speech recognition language</div>
+                </div>
+                <select id="voice-lang-select" style="font-family:var(--font-mono);font-size:10px;padding:4px 8px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-tertiary);color:var(--text-primary);outline:none;">
+                    <option value="en-US">English (US)</option>
+                    <option value="en-GB">English (UK)</option>
+                    <option value="hi-IN">Hindi</option>
+                    <option value="ur-PK">Urdu</option>
+                    <option value="es-ES">Spanish</option>
+                    <option value="fr-FR">French</option>
+                    <option value="de-DE">German</option>
+                    <option value="ja-JP">Japanese</option>
+                    <option value="zh-CN">Chinese</option>
+                    <option value="ar-SA">Arabic</option>
+                </select>
+            </div>
+            <button class="assistant-close-btn" id="assistant-settings-close">Done</button>
+        </div>
+    </div>
+</body>
+</html>
