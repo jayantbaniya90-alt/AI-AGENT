@@ -836,18 +836,10 @@ class App {
     // ── MOBILE SYSTEM ──────────────────────────────────────────
 
     _initMobile() {
-        if (!this.isMobile) {
-            // Desktop: make sure all panels visible
-            document.querySelectorAll('.panel').forEach(p => {
-                p.classList.remove('mobile-hidden', 'mobile-active');
-            });
-            return;
-        }
+        // ALWAYS bind mobile event listeners — CSS controls visibility,
+        // JS just needs to respond when the user interacts.
 
-        // Set initial mobile panel
-        this._switchMobilePanel('chat');
-
-        // Bottom nav buttons
+        // Bottom nav buttons — always bind
         const navBtns = document.querySelectorAll('.mobile-nav-btn');
         navBtns.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -860,16 +852,11 @@ class App {
             });
         });
 
-        // Voice FAB
+        // Voice FAB — always bind
         if (this.dom.voiceFab) {
             let pressTimer;
             this.dom.voiceFab.addEventListener('click', () => {
-                if (this.voice.assistantMode) {
-                    // If assistant is on and awake, toggle listening
-                    this._toggleVoiceInput();
-                } else {
-                    this._toggleVoiceInput();
-                }
+                this._toggleVoiceInput();
             });
 
             // Long press → open settings
@@ -889,7 +876,7 @@ class App {
             });
         }
 
-        // Model drawer
+        // Model drawer — always bind
         if (this.dom.drawerBackdrop) {
             this.dom.drawerBackdrop.addEventListener('click', () => this._closeModelDrawer());
         }
@@ -909,7 +896,7 @@ class App {
             });
         });
 
-        // Assistant settings
+        // Assistant settings — always bind
         const settingsClose = document.getElementById('assistant-settings-close');
         if (settingsClose) {
             settingsClose.addEventListener('click', () => {
@@ -956,6 +943,16 @@ class App {
         if (langSelect) {
             langSelect.addEventListener('change', () => {
                 this.voice.setLanguage(langSelect.value);
+            });
+        }
+
+        // Now apply initial state based on screen size
+        if (this.isMobile) {
+            this._switchMobilePanel('chat');
+        } else {
+            // Desktop: make sure all panels visible
+            document.querySelectorAll('.panel').forEach(p => {
+                p.classList.remove('mobile-hidden', 'mobile-active');
             });
         }
     }

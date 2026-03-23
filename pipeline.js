@@ -55,47 +55,54 @@ class Pipeline {
 
         // 2. Wormhole check
         if (isWormhole) {
-            await this._delay(300);
+            await this._delay(200);
             this._addModeBanner(chatMessages, 'wormhole', '🌀 Wormhole active: Sensor → Text Gen — bypassing 3 layers');
             if (window.app && window.app.viz) window.app.viz.triggerWormhole();
         }
 
         // 3. Black hole queue notice
         if (this.network.blackHoleActive) {
-            await this._delay(200);
+            await this._delay(100);
             this._addModeBanner(chatMessages, 'blackhole', '⚫ BLACK HOLE ACTIVE — All tasks routed through Orchestrator only');
         }
 
         // 4. Activate agents
-        await this._delay(400);
+        await this._delay(200);
         const activated = this.network.activateForTask(taskType);
 
-        // 5. Show activation log
+        // 5. Show activation log (collapsed by default to save space)
         this._addActivationLog(chatMessages, activated);
 
         // 6. Show inter-agent dialogue
-        await this._delay(600);
+        await this._delay(300);
         this._addDialogues(chatMessages, activated, taskType, input);
 
         // 7. Generate response (API or Simulation)
         let response;
         if (this.apiAvailable) {
             // LIVE API CALL
-            await this._delay(200);
-            this._addModeBanner(chatMessages, 'wormhole', `🧠 Querying ${this.getModelLabel()} via Anthropic API...`);
+            await this._delay(100);
+            this._addModeBanner(chatMessages, 'wormhole', `🧠 Querying ${this.getModelLabel()} via API...`);
             response = await this._generateLiveResponse(input, taskType, activated, userEmotion);
         } else {
             // SIMULATION MODE
-            await this._delay(800);
+            await this._delay(400);
             response = this._generateSimulatedResponse(input, taskType, activated);
         }
 
-        // 8. Show response
-        this._addResponse(chatMessages, response, activated);
+        // 8. Show response — THIS IS THE MAIN OUTPUT, MUST BE VISIBLE
+        const responseEl = this._addResponse(chatMessages, response, activated);
 
-        // 9. Show network status
-        await this._delay(300);
+        // 9. Show network status (compact, does NOT scroll)
+        await this._delay(200);
         this._addNetworkStatus(chatMessages);
+
+        // 10. SCROLL BACK to the response so user sees the actual answer
+        requestAnimationFrame(() => {
+            if (responseEl) {
+                responseEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
 
         // 10. Store fact
         this.network.storeFact(`Task processed: "${input.substring(0, 60)}..." (${taskType})`);
@@ -509,10 +516,16 @@ each thread a different color, a different perspective, all converging toward cl
         });
 
         const modeLabel = this.apiAvailable ? 'LIVE' : 'SIM';
+        const logId = 'actlog-' + Date.now();
 
         msg.innerHTML = `
-            <div class="activation-header">🌐 ACTIVATION LOG  [${modeLabel} · ${this.getModelLabel()} · Neural Core v3.0]</div>
-            ${lines}
+            <div class="activation-header" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center" onclick="(function(el){var b=el.parentElement.querySelector('.activation-body');if(b){b.style.display=b.style.display==='none'?'block':'none';el.querySelector('.toggle-arrow').textContent=b.style.display==='none'?'▶':'▼'}})(this)">
+                <span>🌐 ACTIVATION LOG  [${modeLabel} · ${this.getModelLabel()} · ${activated.length} agents]</span>
+                <span class="toggle-arrow" style="font-size:10px;color:var(--text-dim)">▶</span>
+            </div>
+            <div class="activation-body" style="display:none">
+                ${lines}
+            </div>
         `;
         container.appendChild(msg);
         this._scrollToBottom(container);
@@ -585,7 +598,7 @@ each thread a different color, a different perspective, all converging toward cl
 
     _addResponse(container, response, activated) {
         const msg = document.createElement('div');
-        msg.className = 'response-message';
+        msg.className = 'response-message response-highlight';
 
         // Build avatar status line
         let avatarLine = '';
@@ -611,7 +624,7 @@ each thread a different color, a different perspective, all converging toward cl
             : '<span class="response-badge" style="border-color:var(--warning);color:var(--warning)">SIM</span>';
 
         msg.innerHTML = `
-            <div class="response-label">${response.title}  [${this.getModelLabel()}]</div>
+            <div class="response-label">✨ ${response.title}  [${this.getModelLabel()}]</div>
             <div class="response-badges">
                 ${liveIndicator}
                 <span class="response-badge confidence">Confidence: ${response.confidence}%</span>
@@ -624,7 +637,9 @@ each thread a different color, a different perspective, all converging toward cl
             ${usageLine}
         `;
         container.appendChild(msg);
-        this._scrollToBottom(container);
+
+        // Return the element so caller can scroll to it
+        return msg;
     }
 
     _addNetworkStatus(container) {
@@ -633,16 +648,10 @@ each thread a different color, a different perspective, all converging toward cl
         const msg = document.createElement('div');
         msg.className = 'network-status-message';
         msg.innerHTML = `
-            <div class="ns-header">📊 Network: ${net.agents.length} agents · mood: ${dominant.data.emoji} ${dominant.mood} (${dominant.count}) · tasks: ${net.taskCount} · confidence: ${net.getConfidence()}%</div>
-            <div class="ns-row"><span>Active Agents</span><span class="ns-value">${net.getActiveAgents().length}</span></div>
-            <div class="ns-row"><span>Fatigued</span><span class="ns-value">${net.getFatiguedAgents().length}</span></div>
-            <div class="ns-row"><span>Infected</span><span class="ns-value">${net.getInfectedAgents().length}</span></div>
-            <div class="ns-row"><span>Model</span><span class="ns-value">${this.getModelLabel()} ${this.apiAvailable ? '🟢' : '⚪'}</span></div>
-            <div class="ns-row"><span>API Mode</span><span class="ns-value">${this.apiAvailable ? 'LIVE — Anthropic API' : 'SIMULATION'}</span></div>
-            <div class="ns-row"><span>Memory Facts</span><span class="ns-value">${net.memoryFacts.length}</span></div>
+            <div class="ns-header">📊 ${net.agents.length} agents · ${dominant.data.emoji} ${dominant.mood} · tasks: ${net.taskCount} · confidence: ${net.getConfidence()}% · ${this.getModelLabel()} ${this.apiAvailable ? '🟢' : '⚪'}</div>
         `;
         container.appendChild(msg);
-        this._scrollToBottom(container);
+        // Do NOT scroll to bottom here — keep the response visible
     }
 
     _addSystemAlert(container, text) {

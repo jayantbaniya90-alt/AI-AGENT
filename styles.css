@@ -729,6 +729,20 @@ html, body {
     animation: msg-appear 0.4s ease;
 }
 
+/* Highlighted response — glowing border to draw attention */
+.response-message.response-highlight {
+    border: 1px solid rgba(167, 139, 250, 0.4);
+    background: linear-gradient(to bottom, rgba(167, 139, 250, 0.06), var(--bg-card));
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.15), inset 0 1px 0 rgba(167, 139, 250, 0.1);
+    animation: msg-appear 0.4s ease, response-glow 3s ease-out forwards;
+}
+
+@keyframes response-glow {
+    0% { box-shadow: 0 0 24px rgba(167, 139, 250, 0.3), inset 0 1px 0 rgba(167, 139, 250, 0.15); }
+    60% { box-shadow: 0 0 24px rgba(167, 139, 250, 0.3), inset 0 1px 0 rgba(167, 139, 250, 0.15); }
+    100% { box-shadow: 0 0 8px rgba(167, 139, 250, 0.1), inset 0 1px 0 rgba(167, 139, 250, 0.05); }
+}
+
 .response-message .response-label {
     font-family: var(--font-mono);
     font-size: 10px;
@@ -1492,6 +1506,7 @@ html, body {
         opacity: 1;
         pointer-events: auto;
         z-index: 5;
+        display: flex; /* Override tablet display:none for .panel-agents */
     }
 
     .panel-chat {
@@ -1707,7 +1722,7 @@ html, body {
 
     /* Adjust chat input area to clear bottom nav */
     .panel-chat .chat-input-area {
-        padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
     }
 
     /* Adjust agent list to clear bottom nav */
@@ -1725,6 +1740,7 @@ html, body {
 
 @media (max-width: 768px) {
     .mobile-model-drawer {
+        display: block;
         position: fixed;
         bottom: 0;
         left: 0;
@@ -1739,10 +1755,12 @@ html, body {
         transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         max-height: 70vh;
         overflow-y: auto;
+        pointer-events: none;
     }
 
     .mobile-model-drawer.open {
         transform: translateY(0);
+        pointer-events: auto;
     }
 
     .mobile-model-drawer .drawer-handle {
@@ -1817,15 +1835,19 @@ html, body {
     .mobile-model-drawer .model-group-label.anthropic { color: var(--color-reason); }
 
     .drawer-backdrop {
-        display: none;
+        display: block;
         position: fixed;
         inset: 0;
         z-index: 140;
         background: rgba(0,0,0,0.5);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
     }
 
     .drawer-backdrop.open {
-        display: block;
+        opacity: 1;
+        pointer-events: auto;
     }
 }
 
@@ -1840,7 +1862,7 @@ html, body {
     .voice-assistant-fab {
         display: flex;
         position: fixed;
-        bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+        bottom: calc(130px + env(safe-area-inset-bottom, 0px));
         right: 16px;
         z-index: 110;
         width: 56px;
@@ -2070,7 +2092,7 @@ html, body {
         height: 48px;
         font-size: 20px;
         right: 12px;
-        bottom: calc(65px + env(safe-area-inset-bottom, 0px));
+        bottom: calc(125px + env(safe-area-inset-bottom, 0px));
     }
 
     .mobile-nav-btn .nav-icon { font-size: 18px; }
